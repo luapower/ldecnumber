@@ -10,7 +10,7 @@ ldecnumber is a Lua binding for the `decNumber` Decimal Arithmetic package.
 
 Single user billing system
 
-```
+```lua
 local decnumber = require'ldecnumber'
 
 local balance = decnumber.tonumber'0.00'
