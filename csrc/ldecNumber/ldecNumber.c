@@ -291,6 +291,41 @@ static int dn_todecnumber (lua_State *L)
     return 1;
 }
 
+  uint8_t * decPackedFromNumber(uint8_t *, int32_t, int32_t *,
+                                const decNumber *);
+
+  decNumber * decPackedToNumber(const uint8_t *, int32_t, const int32_t *,
+                                decNumber *);
+
+/* ************** pack/unpack extensions by luapower ****************** */
+
+static int dn_frompacked (lua_State *L)
+{
+    const char *s = luaL_checkstring (L, 1);
+    size_t len = lua_objlen (L, 1);
+    lua_Number d_scale = luaL_checknumber (L, 2);
+    decNumber *dn = ldn_make_decNumber (L); /* left in stack */
+    int scale = d_scale;
+    decPackedToNumber (s, len, &scale, dn);
+    return 1;
+}
+
+static int dn_topacked (lua_State *L)
+{
+    decNumber *dn = luaL_checkudata (L, 1, dn_dnumber_meta);
+    if (dn == NULL)
+        luaL_typerror (L, 1, dn_dnumber_meta);
+    int scale;
+    int len = (dn->digits + 1) / 2;
+    void *ud;
+    lua_Alloc f = lua_getallocf (L, &ud);
+    char *dbuf = (*f) (ud, NULL, 0, len); // malloc
+    if (dbuf == NULL) luaL_error (L, "decNumber topacked cannot malloc");
+    decPackedFromNumber (dbuf, len, &scale, dn);
+    lua_pushlstring (L, dbuf, len);
+    return 1;
+}
+
 /* ***************** decNumber methods ******************** */
 
 #define DN_OP1(name,fun) \
@@ -597,7 +632,6 @@ static int dn_concat (lua_State *L)
     lua_concat (L,2);
     return 1;
 }
-
 
 /* *********************** context methods ************************** */
 
@@ -1116,6 +1150,8 @@ static const luaL_Reg dn_lib[] =
     {"tonumber",        dn_todecnumber   },
     {"tostring",        dn_string        },
     {"toengstring",     dn_engstring     },
+    {"frompacked",      dn_frompacked    },
+    {"topacked",        dn_topacked      },
 
     {"randomstate",     dn_randomstate   },
 

@@ -2,6 +2,8 @@
 
 ldecnumber is a Lua binding for the `decNumber` Decimal Arithmetic package.
 
+Two methods added: `dn:frompacked()` and `dn:topacked()` for working with [tarantool].
+
 [ldecNumber docs here](https://htmlpreview.github.io/?https://github.com/tarantool/ldecnumber/blob/master/doc/ldecNumber.html)
 
 [decNumber docs here](http://speleotrove.com/decimal/decnumber.html)
